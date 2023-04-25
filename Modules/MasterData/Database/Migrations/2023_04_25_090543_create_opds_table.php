@@ -27,6 +27,7 @@ class CreateOpdsTable extends Migration
             $table->decimal('p_izin')->nullable();
             $table->integer('cuti')->nullable();
             $table->decimal('p_cuti')->nullable();
+            $table->string('file_absensi')->nullable();
             $table->timestamps();
         });
     }

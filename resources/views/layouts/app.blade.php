@@ -133,7 +133,7 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         @php
-                            $modules = ['dashboard', 'administrator', 'masterdata'];
+                            $modules = ['dashboard', 'register', 'administrator', 'masterdata'];
                         @endphp
                         @foreach ($modules as $module)
                         @include("$module::sidebar")

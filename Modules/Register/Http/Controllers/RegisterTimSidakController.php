@@ -1,20 +1,19 @@
 <?php
 
-namespace Modules\MasterData\Http\Controllers;
+namespace Modules\Register\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\MasterData\Entities\Opd;
+use Illuminate\Support\Facades\Auth;
 use Modules\MasterData\Entities\TimSidak;
 use Yajra\DataTables\Facades\DataTables;
 
-class TimSidakController extends Controller
+class RegisterTimSidakController extends Controller
 {
     public function index()
     {
-        $opds = Opd::orderBy('nama')->get();
-        return view('masterdata::tim-sidak.index', compact('opds'));
+        return view('register::tim-sidak.index');
     }
 
     public function download(Request $request)
@@ -22,6 +21,7 @@ class TimSidakController extends Controller
         if($request->ajax()){
             $request->validate(['nip' => 'required'],[],['nip' => 'NIP ASN']);
             $nips = explode("\r\n", $request->nip);
+            $opd_id = Auth::user()->opd_id;
             foreach ($nips as $nip) {
                 $pns = $this->getRequestSiasnInstansi("/profilasn/api/pns?nip_lama=&nip_baru=$nip");
                 if(isset($pns['Value'])){
@@ -34,32 +34,12 @@ class TimSidakController extends Controller
                         'id'       => $orang['id'],
                         'nip_baru' => $orang['nip_baru'],
                         'nama'     => $orang['nama'],
-                        'opd_id'   => $request->opd_id,
+                        'opd_id'   => $opd_id,
                     ]);
                 }
             }
 
             return $this->sendReponse(false, Response::HTTP_OK, "Download data berhasil");
-        }
-    }
-
-    public function edit(Request $request, $id)
-    {
-        if($request->ajax()){
-            $data = TimSidak::find($id);
-            $data['action'] = route('tim-sidak.update', $id);
-            return $this->sendReponse(false, Response::HTTP_OK, null, [$data]);
-        }
-    }
-
-    public function update(Request $request, $id)
-    {
-        if($request->ajax()){
-            $request->validate(['opd_id' => 'required'],[],['opd_id' => 'OPD']);
-            $data         = TimSidak::find($id);
-            $data->opd_id = $request->opd_id;
-            $data->save();
-            return $this->sendReponse(false, Response::HTTP_OK, "Update data berhasil");
         }
     }
 
@@ -76,17 +56,11 @@ class TimSidakController extends Controller
         if($request->ajax()){
             $data = TimSidak::query()->with('opd')->select('tim_sidaks.*');
             return DataTables::eloquent($data)
-            ->addColumn('opd', function ($data){
-                return $data->opd->nama ?? "";
-            })->addColumn('action', function ($data){
+            ->addColumn('action', function ($data){
                 return view('components.datatable-action', [
                     'actions' => [
-                        'edit' => [
-                            'href' => route('tim-sidak.edit', $data->id),
-                            'show' => 1
-                        ],
                         'delete' => [
-                            'href' => route('tim-sidak.delete', $data->id),
+                            'href' => route('register.tim-sidak.delete', $data->id),
                             'show' => 1
                         ]
                     ]

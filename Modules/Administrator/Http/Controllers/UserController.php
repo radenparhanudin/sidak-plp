@@ -31,14 +31,16 @@ class UserController extends Controller
                     $pns_id = $pns['Value'][0]['id'];
                     $orang = $this->getRequestSiasnInstansi("/profilasn/api/orang?id=$pns_id");
                     $orang = $pns['Value'][0];
-                    User::updateOrCreate([
-                        'id'       => $orang['id'],
-                    ],[
-                        'id'       => $orang['id'],
-                        'name'     => $orang['nama'],
-                        'username' => $orang['nip_baru'],
-                        'email' => $orang['nip_baru'] .'@mail.com',
-                    ]);
+                    $user = User::find($orang['id']);
+                    if(!isset($user)){
+                        $user = User::create([
+                            'id'       => $orang['id'],
+                            'name'     => $orang['nama'],
+                            'username' => $orang['nip_baru'],
+                            'email' => $orang['nip_baru'] .'@mail.com',
+                        ]);
+                        $user->assignRole('adminopd');
+                    }
                 }
             }
 
@@ -65,6 +67,7 @@ class UserController extends Controller
             $data->save();
             $data->fresh();
             $data->syncRoles([$request->role_name]);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
             return $this->sendReponse(false, Response::HTTP_OK, "Update data berhasil");
         }
     }
@@ -78,14 +81,14 @@ class UserController extends Controller
     public function datatable(Request $request)
     {
         if($request->ajax()){
-            $data = User::query()->with('opd')->select('users.*');
+            $data = User::query()->with('opd', 'roles')->select('users.*');
             return DataTables::eloquent($data)
             ->addColumn('opd', function ($data){
                 return $data->opd->nama ?? "";
             })
-            ->addColumn('roles', function ($data) {
+            ->addColumn('description', function ($data) {
                 return $data->roles->map(function($role) {
-                    return $role->description;
+                    return $role->description ?? "";
                 })->implode(', ');
             })
             ->addColumn('action', function ($data) {

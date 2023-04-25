@@ -31,6 +31,11 @@
     'formAction' => route('tim-sidak.download'),
     'modalBody' => view('masterdata::tim-sidak.form-download', compact('opds')),
 ])
+@include('components.modal-post',[
+    'formAction' => 'javascript:void(0)',
+    'modalTitle' => 'Update OPD',
+    'modalBody' => view('masterdata::tim-sidak.form-post', compact('opds')),
+])
 @endsection
 @include('components.datatable')
 @include('components.select2')
@@ -46,6 +51,33 @@
                 {data: 'action', name: 'action', className:'text-nowrap text-center w-5'},
             ],
         })
+
+        $('#dataTable').on('click', '.btn-edit', function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr('href'),
+                beforeSend: function () {
+                    $('body').loadingModal({
+                        backgroundColor: 'rgb(62, 142, 247)',
+                        animation: 'cubeGrid'
+                    });
+                },
+                success:function (res) {
+                    $('body').loadingModal('destroy')
+                    if(res.status){
+                        let result = res.results[0];
+                        $('#formModalPost').attr({
+                            'action' : result.action, 
+                            'method': 'PUT'
+                        })
+                        $('#opd_id').val(result.opd_id).trigger('change')
+                        $('#modalPost').modal('show')
+                    }else{
+                        notyf.error(res.message)
+                    }
+                }
+            })
+        });
     })
 </script>
 @endpush

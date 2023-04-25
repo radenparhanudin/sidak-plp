@@ -37,7 +37,6 @@
     'modalTitle' => 'Update User',
     'modalBody' => view('administrator::user.form-post', compact('opds', 'roles')),
 ])
-
 @endsection
 @include('components.datatable')
 @include('components.select2')
@@ -51,7 +50,7 @@
                 {data: 'name', name: 'name'},
                 {data: 'username', name: 'username'},
                 {data: 'opd', name: 'opd.nama'},
-                {data: 'roles', name: 'roles.description'},
+                {data: 'description', name: 'roles.description'},
                 {data: 'action', name: 'action', className:'text-nowrap text-center w-5'},
             ],
         })

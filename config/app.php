@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-    'token_siasn' => env('TOKEN_SIASN', null),
+    'tanggal_sidak' => env('TANGGAL_SIDAK', null),
 
     /*
     |--------------------------------------------------------------------------
